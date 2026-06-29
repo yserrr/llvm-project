@@ -170,6 +170,11 @@ void genObjectList(const ObjectList &objects,
 void lastprivateModifierNotSupported(const omp::clause::Lastprivate &lastp,
                                      mlir::Location loc);
 
+/// Return the next DO construct nested in \p eval, skipping intervening code in
+/// an imperfect loop nest, or null when there is none left to descend into
+/// (e.g. the loop nest is shallower than required).
+pft::Evaluation *tryGetNestedDoConstruct(pft::Evaluation &eval);
+
 pft::Evaluation *getNestedDoConstruct(pft::Evaluation &eval);
 
 int64_t collectLoopRelatedInfo(
@@ -273,6 +278,8 @@ void collectEnclosingConstructTraits(
 semantics::omp::OmpVariantMatchContext makeVariantMatchContext(
     mlir::ModuleOp module,
     llvm::ArrayRef<llvm::omp::TraitProperty> constructTraits);
+
+bool isMetadirectiveEval(lower::pft::Evaluation &eval);
 
 } // namespace omp
 } // namespace lower
