@@ -1058,7 +1058,7 @@ consumed by `llvm-profdata` and `llvm-cov`.
 Source-based device coverage relies on the AMDGPU profile runtime, so
 the toolchain must be built with the same CMake configuration used for
 HIP offload PGO. See the *Prerequisites* subsection under
-[Profile-Guided Optimization for Device Code].
+[Profile-Guided Optimization for Device Code](#profile-guided-optimization-for-device-code).
 
 ### Example
 
