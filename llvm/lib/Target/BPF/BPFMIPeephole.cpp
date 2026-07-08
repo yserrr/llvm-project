@@ -48,6 +48,7 @@ struct BPFMIPeephole : public MachineFunctionPass {
 
   static char ID;
   const BPFInstrInfo *TII;
+  const BPFRegisterInfo *TRI;
   MachineFunction *MF;
   MachineRegisterInfo *MRI;
 
@@ -89,15 +90,13 @@ void BPFMIPeephole::initialize(MachineFunction &MFParm) {
   MF = &MFParm;
   MRI = &MF->getRegInfo();
   TII = MF->getSubtarget<BPFSubtarget>().getInstrInfo();
+  TRI = &TII->getRegisterInfo();
   LLVM_DEBUG(dbgs() << "*** BPF MachineSSA ZEXT Elim peephole pass ***\n\n");
 }
 
 bool BPFMIPeephole::isCopyFrom32Def(MachineInstr *CopyMI)
 {
   MachineOperand &opnd = CopyMI->getOperand(1);
-
-  if (!opnd.isReg())
-    return false;
 
   // Return false if getting value from a 32bit physical register.
   // Most likely, this physical register is aliased to
@@ -106,7 +105,11 @@ bool BPFMIPeephole::isCopyFrom32Def(MachineInstr *CopyMI)
   if (!Reg.isVirtual())
     return false;
 
-  if (MRI->getRegClass(Reg) == &BPF::GPRRegClass)
+  const TargetRegisterClass *RC = MRI->getRegClass(Reg);
+  if (unsigned SubReg = opnd.getSubReg())
+    RC = TRI->getSubRegisterClass(RC, SubReg);
+
+  if (!RC->hasSubClassEq(&BPF::GPRRegClass))
     return false;
 
   MachineInstr *DefInsn = MRI->getVRegDef(Reg);
